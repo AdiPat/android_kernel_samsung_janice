@@ -182,6 +182,13 @@ obj-$(CONFIG_SND_SOC_WM9705)	+= snd-soc-wm9705.o
 obj-$(CONFIG_SND_SOC_WM9712)	+= snd-soc-wm9712.o
 obj-$(CONFIG_SND_SOC_WM9713)	+= snd-soc-wm9713.o
 obj-$(CONFIG_SND_SOC_WM_HUBS)	+= snd-soc-wm-hubs.o
+#
+# Aditya Patange 24/1/2013
+#
+# AB8500 Sound control driver 
+#
+#
+obj-$(CONFIG_AB8500_SOUND_BOOST_CONTROL) += ab8500_sound_control.o
 
 # Amp
 obj-$(CONFIG_SND_SOC_LM4857)	+= snd-soc-lm4857.o

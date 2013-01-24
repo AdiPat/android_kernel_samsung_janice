@@ -40,6 +40,11 @@
 #include <linux/mfd/dbx500-prcmu.h>
 #include "ab8500_audio.h"
 
+#ifdef CONFIG_AB8500_SOUND_BOOST_CONTROL
+#include <sound/ab8500_sound_control.h>
+#endif
+
+
 /* To convert register definition shifts to masks */
 #define BMASK(bsft)	(1 << (bsft))
 
@@ -3978,7 +3983,9 @@ controls_done:
 	}
 
 	ab850x_codec = codec;
-
+#ifdef CONFIG_AB8500_SOUND_BOOST_CONTROL
+	sound_boost_register(codec);
+#endif
 	return ret;
 }
 
