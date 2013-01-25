@@ -134,6 +134,9 @@ mv kernel.bin kernel.bin.md5
 $bold
 $yellow
 echo "kernel.bin.md5 at $OUT/kernel.bin.md5"
+# Remove VERSION File if exists
+rm VERSION 
+rm kernel.bin
 $cyan
 echo "DONE, PRESS ENTER TO FINISH"
 $normal
@@ -143,6 +146,8 @@ $red
 echo "No compiled zImage at $KERNEL_DIR/arch/arm/boot/zImage"
 echo "Compilation failed - Fix errors and recompile "
 echo "Press enter to end script"
+# Remove VERSION file if exists
+rm VERSION
 $normal
 read ANS
 fi
