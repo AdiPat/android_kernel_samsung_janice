@@ -25,7 +25,7 @@
 #define REG_ANAGAIN3_HSLGAIN_BOOST		3
 #define REG_ANAGAIN3_HSRGAIN_BOOST		3
 /* Toggle */ 
-int sound_boost_status = 0;
+static int sound_boost_status = 0;
 
 static struct snd_soc_codec *sound_boost_codec;
 
@@ -47,10 +47,7 @@ static ssize_t sound_boost_control_show(struct kobject *kobj, struct kobj_attrib
 static ssize_t sound_boost_control_store(struct kobject *kobj, struct kobj_attribute *attr,
 			 const char *buf, size_t count)
 {
-	
-	int toggle;
-	sscanf(buf, "%d" ,&toggle);
-	toggle = sound_boost_status;	
+	sscanf(buf, "%d" ,&sound_boost_status);
 	if (sound_boost_status == 0)
 	{
 		printk(KERN_DEBUG "[ab8500-Sound-Control] Sound boost disabled\n");
@@ -66,7 +63,6 @@ static ssize_t sound_boost_control_store(struct kobject *kobj, struct kobj_attri
 	else
 	{
 		printk(KERN_DEBUG "[ab8500-Sound-Control] Invalid Value, 1 to enable, 0 to disable\n");
-		sound_boost_status = 0;		
 	}
 	return count;
 }
