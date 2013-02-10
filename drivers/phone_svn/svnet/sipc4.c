@@ -463,7 +463,7 @@ void sipc_handler(u16 len, u8 *buf, void *data)
 	if (!si || !si->queue)
 		return;
 
-	_fmt_wakelock_timeout();
+//	_fmt_wakelock_timeout();
 
 	_read_fmt_from_shrm(si, buf, len);
 
@@ -486,7 +486,7 @@ void sraw_handler(u16 len, u8 *buf, void *data)
 	if (!si || !si->queue)
 		return;
 
-	_non_fmt_wakelock_timeout();
+//	_non_fmt_wakelock_timeout();
 
 	_read_raw_from_shrm(si, buf, len);
 }
@@ -2124,10 +2124,11 @@ int sipc_read(struct sipc *si, u32 mailbox, int *cond)
 		if (!inbuf)
 			continue;
 
-		if (i == IPCIDX_FMT)
-			_fmt_wakelock_timeout();
-		else
-			_non_fmt_wakelock_timeout();
+
+//		if (i == IPCIDX_FMT)
+//			_fmt_wakelock_timeout();
+//		else
+//			_non_fmt_wakelock_timeout();
 
 		_dbg("%s: %d bytes in %d\n", __func__, inbuf, i);
 

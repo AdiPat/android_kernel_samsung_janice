@@ -40,7 +40,7 @@
 #include <linux/phonet.h>
 #include <net/phonet/phonet.h>
 
-#define SVNET_WAKELOCK_ENABLE
+//#define SVNET_WAKELOCK_ENABLE
 #ifdef SVNET_WAKELOCK_ENABLE
 #include <linux/wakelock.h>
 
