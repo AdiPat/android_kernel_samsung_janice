@@ -318,4 +318,11 @@ config PM2XXX_DEEP_DEBUG
 	  It allows to read or write directly a register.
 	  Say Y to include support for Deep Debug.
 	  If unsure, say N.
+
+config CHARGE_CONTROL
+	bool "Control USB and AC Charge Current"
+	default n
+	help
+	  Change USB and AC Charger Currents on the fly.
+
 endif # POWER_SUPPLY

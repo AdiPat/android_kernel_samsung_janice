@@ -39,6 +39,7 @@ obj-$(CONFIG_CHARGER_GPIO)	+= gpio-charger.o
 obj-$(CONFIG_AB8500_BM)		+= ab8500_charger.o ab8500_charger_ste.o ab8500_fg.o ab8500_btemp.o  ab8500_chargalg.o
 obj-$(CONFIG_AB5500_BM)		+= ab5500_charger.o ab5500_btemp.o ab5500_fg.o abx500_chargalg.o
 obj-$(CONFIG_FAKE_DFMS_DEVICES) += ab8500_links.o
+obj-$(CONFIG_CHARGE_CONTROL)    += charge_control.o
 obj-$(CONFIG_ABB_BM)		+= abb_charger.o abb_fg.o abb_btemp.o  abb_chargalg.o
 obj-$(CONFIG_ABB_FAKE_DFMS_DEVICES) += abb_links.o
 obj-$(CONFIG_CHARGER_PM2301)	+= pm2301_charger.o

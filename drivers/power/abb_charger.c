@@ -34,6 +34,13 @@
 #include <linux/usb_switcher.h>
 #endif
 
+#ifdef CONFIG_CHARGE_CONTROL
+extern void charger_control_register_ac_curr(int ac_current);
+extern void charger_control_register_usb_curr(int usb_current);
+extern int get_ac_curr(void);
+extern int get_usb_curr(void);
+#endif
+
 #define MAIN_CH_OUT_CUR_LIM		0xf6
 #define MAIN_CH_OUT_CUR_LIM_SHIFT	4
 #define MAIN_CH_OUT_CUR_LIM_100_MA	0
@@ -1384,7 +1391,6 @@ static int ab8500_charger_led_en(struct ab8500_charger *di, int on)
 	return ret;
 }
 
-
 /**
  * ab8500_charger_ac_en() - enable or disable ac charging
  * @di:		pointer to the ab8500_charger structure
@@ -1413,8 +1419,15 @@ static int ab8500_charger_ac_en(struct ux500_charger *charger,
 	charger_status = ab8500_charger_detect_chargers(di);
 	vbus_status = ab8500_vbus_is_detected(di);
 
+#ifdef CONFIG_CHARGE_CONTROL
+	di->bat->ta_chg_current_input = get_ac_curr();
+	di->bat->usb_chg_current_input = get_usb_curr();
+//	printk(KERN_DEBUG "AC Current set to %d \n", di->bat->ta_chg_current_input);
+//	printk(KERN_DEBUG "USB Current set to %d \n", di->bat->usb_chg_current_input);
+#else 
 	di->bat->ta_chg_current_input = di->bat->chg_params->ac_curr_max;
 	di->bat->usb_chg_current_input = di->bat->chg_params->usb_curr_max;
+#endif
 
 	ab8500_charger_init_vdrop_state(di);
 
@@ -3524,6 +3537,11 @@ static int __devinit ab8500_charger_probe(struct platform_device *pdev)
 			ab8500_charger_irq[i].name, irq, ret);
 	}
 
+#ifdef CONFIG_CHARGE_CONTROL
+	/* Register Platform data with the charge control driver */ 
+	charger_control_register_ac_curr(di->bat->chg_params->ac_curr_max);
+	charger_control_register_usb_curr(di->bat->chg_params->usb_curr_max);
+#endif
 	platform_set_drvdata(pdev, di);
 	di->parent->charger = di;
 
