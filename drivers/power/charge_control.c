@@ -156,7 +156,7 @@ static int __init charge_control_init(void)
 	}
     return 0;
 }
+device_initcall(charge_control_init);
 
-early_initcall(charge_control_init);
 MODULE_AUTHOR("Aditya Patange");
 MODULE_LICENSE("GPL");
