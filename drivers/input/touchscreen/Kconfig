@@ -811,5 +811,11 @@ config TOUCHSCREEN_TMA140
 	help
 	  This enables support for TMA140 driver over I2C based touchscreens.
 
+config TOUCH_BOOST
+	tristate "CPU boost on touch input"
+	help
+          Adds support to enable CPU Boost on detecting touch input events,
+	  configuarable timeout and boost frequency via sysfs.
+
 endif
 

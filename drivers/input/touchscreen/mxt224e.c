@@ -13,8 +13,6 @@
  *
  */
 
-#define TOUCH_BOOSTER
-
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/input.h>
@@ -29,8 +27,9 @@
 #include <linux/firmware.h>
 #include <linux/input/mt.h>
 
-#if defined(TOUCH_BOOSTER)
-#include <linux/mfd/dbx500-prcmu.h>
+#ifdef CONFIG_TOUCH_BOOST
+extern void touchboost(void);
+extern void start_timeout(void);
 #endif
 
 #define OBJECT_TABLE_START_ADDRESS	7
@@ -152,9 +151,6 @@ struct mxt224_data {
 	void (*read_ta_status)(void *);
 	const u8 *config_fw_version;
 	int num_fingers;
-#if defined(TOUCH_BOOSTER)
-	u8 finger_cnt;
-#endif
 	struct finger_info fingers[];
 };
 
@@ -904,43 +900,14 @@ static void report_input_data(struct mxt224_data *data)
 	if (data->fingers[id].state == MXT224_STATE_INACTIVE)
 		goto out;
 
-#if defined(TOUCH_BOOSTER)
-	if (data->fingers[id].state == MXT224_STATE_PRESS) {
-		if (data->finger_cnt == 0) {
-			prcmu_qos_update_requirement(
-				PRCMU_QOS_APE_OPP,
-				(char *)data->client->name,
-				PRCMU_QOS_APE_OPP_MAX);
-			prcmu_qos_update_requirement(
-				PRCMU_QOS_DDR_OPP,
-				(char *)data->client->name,
-				PRCMU_QOS_DDR_OPP_MAX);
-			prcmu_qos_update_requirement(
-				PRCMU_QOS_ARM_KHZ,
-				(char *)data->client->name,
-				800000);
-		}
-
-		data->finger_cnt++;
-
-	} else if (data->fingers[id].state == MXT224_STATE_RELEASE) {
-		if (data->finger_cnt > 0)
-			data->finger_cnt--;
-
-		if (data->finger_cnt == 0) {
-			prcmu_qos_update_requirement(
-				PRCMU_QOS_APE_OPP,(
-				char *)data->client->name,
-				PRCMU_QOS_DEFAULT_VALUE);
-			prcmu_qos_update_requirement(
-				PRCMU_QOS_DDR_OPP,
-				(char *)data->client->name,
-				PRCMU_QOS_DEFAULT_VALUE);
-			prcmu_qos_update_requirement(
-				PRCMU_QOS_ARM_KHZ,
-				(char *)data->client->name,
-				PRCMU_QOS_DEFAULT_VALUE);
-		}
+#ifdef CONFIG_TOUCH_BOOST
+	if (data->fingers[id].state == MXT224_STATE_PRESS)
+	{
+			touchboost();
+	}
+	else if (data->fingers[id].state == MXT224_STATE_RELEASE) 
+	{
+			start_timeout();
 	}
 #endif
 
@@ -1315,25 +1282,6 @@ static int mxt224_internal_suspend(struct mxt224_data *data)
 		data->finger_mask = i;
 		report_input_data(data);
 	}
-
-#if defined(TOUCH_BOOSTER)
-	if (data->finger_cnt > 0) {
-		prcmu_qos_update_requirement(
-			PRCMU_QOS_APE_OPP,(
-			char *)data->client->name,
-			PRCMU_QOS_DEFAULT_VALUE);
-		prcmu_qos_update_requirement(
-			PRCMU_QOS_DDR_OPP,
-			(char *)data->client->name,
-			PRCMU_QOS_DEFAULT_VALUE);
-		prcmu_qos_update_requirement(
-			PRCMU_QOS_ARM_KHZ,
-			(char *)data->client->name,
-			PRCMU_QOS_DEFAULT_VALUE);
-
-		data->finger_cnt = 0;
-	}
-#endif
 
 	if (!tsp_deepsleep)
 		data->power_con(false);
@@ -2590,15 +2538,6 @@ static int __devinit mxt224_probe(struct i2c_client *client,
 	mutex_init(&data->lock);
 	data->enabled = 1;
 
-#if defined(TOUCH_BOOSTER)
-	prcmu_qos_add_requirement(PRCMU_QOS_APE_OPP, (char *)client->name,
-				  PRCMU_QOS_DEFAULT_VALUE);
-	prcmu_qos_add_requirement(PRCMU_QOS_DDR_OPP, (char *)client->name,
-				  PRCMU_QOS_DEFAULT_VALUE);
-	prcmu_qos_add_requirement(PRCMU_QOS_ARM_KHZ, (char *)client->name,
-				  PRCMU_QOS_DEFAULT_VALUE);
-	dev_info(&client->dev, "add_prcmu_qos is added\n");
-#endif
 
 	valid_touch = 0;
 	ret = request_threaded_irq(client->irq, NULL, mxt224_irq_thread,
@@ -2754,11 +2693,7 @@ static int __devinit mxt224_probe(struct i2c_client *client,
 	return 0;
 
 err_irq:
-#if defined(TOUCH_BOOSTER)
-	prcmu_qos_remove_requirement(PRCMU_QOS_APE_OPP, (char *)client->name);
-	prcmu_qos_remove_requirement(PRCMU_QOS_DDR_OPP, (char *)client->name);
-	prcmu_qos_remove_requirement(PRCMU_QOS_ARM_KHZ, (char *)client->name);
-#endif
+
 err_reset:
 err_backup:
 err_config:
@@ -2783,12 +2718,6 @@ static int __devexit mxt224_remove(struct i2c_client *client)
 #endif
 	free_irq(client->irq, data);
 	
-#if defined(TOUCH_BOOSTER)
-	prcmu_qos_remove_requirement(PRCMU_QOS_APE_OPP, (char *)client->name);
-	prcmu_qos_remove_requirement(PRCMU_QOS_DDR_OPP, (char *)client->name);
-	prcmu_qos_remove_requirement(PRCMU_QOS_ARM_KHZ, (char *)client->name);
-#endif
-
 	kfree(data->objects);
 	gpio_free(data->gpio_read_done);
 	data->power_con(false);

@@ -71,4 +71,4 @@ obj-$(CONFIG_TOUCHSCREEN_MMS136_TS) += mms136_ts.o
 obj-$(CONFIG_TOUCHSCREEN_MMS134S_TS) += mms134s_ts.o
 obj-$(CONFIG_TOUCHSCREEN_MMS1XX_TS) += mms1xx_ts.o
 obj-$(CONFIG_TOUCHSCREEN_TMA140)	+= tma140_skomer.o tma140_download_skomer.o
-
+obj-$(CONFIG_TOUCH_BOOST)           += touchboost.o 
