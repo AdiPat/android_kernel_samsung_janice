@@ -17,15 +17,13 @@
 #include <linux/init.h>
 #include <linux/sysfs.h>
 #include <linux/kobject.h>
-#include <linux/clk.h>
 #include <linux/delay.h>
 #include <linux/mutex.h>
 #include <linux/hrtimer.h>
 #include <linux/mfd/dbx500-prcmu.h>
-#include <linux/input/touchboost.h>
 
-#define TOUCHBOOST_VERSION     1
-#define TOUCHBOOST_DEBUG       1
+#define TOUCHBOOST_VERSION     1 
+#define TOUCHBOOST_DEBUG       0
 
 /* Supported Frequencies to boost in Mhz */
 #define TOUCHBOOST_FREQUENCY1  200
