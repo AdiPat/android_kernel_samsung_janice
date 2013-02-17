@@ -32,83 +32,37 @@
 #include <linux/input.h>
 
 /* Constants */
-#define MODULE_NAME					"tspdrv"
-#define TSPDRV							"/dev/"MODULE_NAME
+#define MODULE_NAME				"tspdrv"
+#define TSPDRV					"/dev/"MODULE_NAME
 #define TSPDRV_MAGIC_NUMBER			0x494D4D52
 #define TSPDRV_STOP_KERNEL_TIMER		_IO(TSPDRV_MAGIC_NUMBER & 0xFF, 1)
-/* 
-** Obsolete IOCTL command 
-** #define TSPDRV_IDENTIFY_CALLER           _IO(TSPDRV_MAGIC_NUMBER & 0xFF, 2)
-*/
-#define TSPDRV_ENABLE_AMP                   _IO(TSPDRV_MAGIC_NUMBER & 0xFF, 3)
-#define TSPDRV_DISABLE_AMP                  _IO(TSPDRV_MAGIC_NUMBER & 0xFF, 4)
-#define TSPDRV_GET_NUM_ACTUATORS        _IO(TSPDRV_MAGIC_NUMBER & 0xFF, 5)
-#define VIBE_MAX_DEVICE_NAME_LENGTH	64
-#define SPI_HEADER_SIZE                 		3   /* DO NOT CHANGE - SPI buffer header size */
-#define VIBE_OUTPUT_SAMPLE_SIZE            50  /* DO NOT CHANGE - maximum number of samples */
-
+#define TSPDRV_ENABLE_AMP                       _IO(TSPDRV_MAGIC_NUMBER & 0xFF, 3)
+#define TSPDRV_DISABLE_AMP                      _IO(TSPDRV_MAGIC_NUMBER & 0xFF, 4)
+#define TSPDRV_GET_NUM_ACTUATORS                _IO(TSPDRV_MAGIC_NUMBER & 0xFF, 5)
+#define VIBE_MAX_DEVICE_NAME_LENGTH	        64
+#define SPI_HEADER_SIZE                 	3   /* DO NOT CHANGE - SPI buffer header size */
+#define VIBE_OUTPUT_SAMPLE_SIZE                 50  /* DO NOT CHANGE - maximum number of samples */
 #define ISA1200_POLLING_DELAY			5
 #define IMMVIBE_RETRY_COUNT			10
 
-/* Type definitions */
-#ifdef __KERNEL__
-typedef int8_t	VibeInt8;
-typedef u_int8_t	VibeUInt8;
-typedef int16_t	VibeInt16;
-typedef u_int16_t	VibeUInt16;
-typedef int32_t	VibeInt32;
-typedef u_int32_t	VibeUInt32;
-typedef u_int8_t	VibeBool;
-typedef VibeInt32	VibeStatus;
-
 typedef struct
 {
-    VibeUInt8 nActuatorIndex;  /* 1st byte is actuator index */
-    VibeUInt8 nBitDepth;       /* 2nd byte is bit depth */
-    VibeUInt8 nBufferSize;     /* 3rd byte is data size */
-    VibeUInt8 dataBuffer[VIBE_OUTPUT_SAMPLE_SIZE];
+    u_int8_t nActuatorIndex;  /* 1st byte is actuator index */
+    u_int8_t nBitDepth;       /* 2nd byte is bit depth */
+    u_int8_t nBufferSize;     /* 3rd byte is data size */
+    u_int8_t dataBuffer[VIBE_OUTPUT_SAMPLE_SIZE];
 } samples_buffer;
 
 typedef struct
 {
-    VibeInt8 nIndexPlayingBuffer;
-    VibeUInt8 nIndexOutputValue;
+    int8_t nIndexPlayingBuffer;
+    u_int8_t nIndexOutputValue;
     samples_buffer actuatorSamples[2]; /* Use 2 buffers to receive samples from user mode */
 } actuator_samples_buffer;
 
-#endif
-
 /* Error and Return value codes */
 #define VIBE_S_SUCCESS                      0	/* Success */
-#define VIBE_E_FAIL				    -4	/* Generic error */
-
-#if defined(VIBE_RECORD) && defined(VIBE_DEBUG)
-    void _RecorderInit(void);
-    void _RecorderTerminate(void);
-    void _RecorderReset(int nActuator);
-    void _Record(int actuatorIndex, const char *format,...);
-#endif
-
-/* Kernel Debug Macros */
-#ifdef __KERNEL__
-    #ifdef VIBE_DEBUG
-        #define DbgOut(_x_) printk _x_
-    #else   /* VIBE_DEBUG */
-        #define DbgOut(_x_)
-    #endif  /* VIBE_DEBUG */
-
-    #if defined(VIBE_RECORD) && defined(VIBE_DEBUG)
-        #define DbgRecorderInit(_x_) _RecorderInit _x_
-        #define DbgRecorderTerminate(_x_) _RecorderTerminate _x_
-        #define DbgRecorderReset(_x_) _RecorderReset _x_
-        #define DbgRecord(_x_) _Record _x_
-    #else /* defined(VIBE_RECORD) && defined(VIBE_DEBUG) */
-        #define DbgRecorderInit(_x_)
-        #define DbgRecorderTerminate(_x_)
-        #define DbgRecorderReset(_x_)
-        #define DbgRecord(_x_)
-    #endif /* defined(VIBE_RECORD) && defined(VIBE_DEBUG) */
-#endif  /* __KERNEL__ */
+#define VIBE_E_FAIL		           -4	/* Generic error */
 
 
 /* isa1200 specifc */
@@ -120,7 +74,4 @@ struct isa1200_data
 	struct input_dev	*input;
 	struct isa1200_platform_data *pdata;
 };
-int immvibe_i2c_write(struct i2c_client* client, u8 reg, u8 val);
-/* isa1200 specifc end */
-
-#endif  /* _TSPDRV_H */
+#endif
