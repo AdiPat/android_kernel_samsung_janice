@@ -27,6 +27,8 @@
 #include <linux/firmware.h>
 #include <linux/input/mt.h>
 
+#define TOUCH_DEBUG 0
+
 #ifdef CONFIG_TOUCH_BOOST
 extern void touchboost(void);
 extern void start_timeout(void);
@@ -404,7 +406,9 @@ uint8_t calibrate_chip(void)
 				if calibration was good or bad */
 			cal_check_flag = 1u;
 			Doing_calibration_falg = 1;
+#ifdef TOUCH_DEBUG
 			printk(KERN_ERR "[TSP] calibration success!!!\n");
+#endif
 		}
 	}
 	return ret;
@@ -544,7 +548,9 @@ static void mxt224_ta_probe(int __vbus_state)
 }
 
 void mxt224e_ts_change_vbus_state(bool vbus_status) {
+#ifdef TOUCH_DEBUG
 	printk(KERN_INFO "mxt224e : vbus state is changed. (%d)\n", vbus_status);
+#endif
 	mxt224_ta_probe((int)vbus_status);
 }
 EXPORT_SYMBOL(mxt224e_ts_change_vbus_state);
@@ -644,9 +650,9 @@ void check_chip_calibration(struct mxt224_data *data)
 
 			}
 		}
-
+#ifdef TOUCH_DEBUG
 		printk(KERN_INFO "[TSP] t: %d, a: %d\n", tch_ch, atch_ch);
-
+#endif
 		/* send page up command so we can detect
 		   when data updates next time,
 		   page byte will sit at 1 until we next send F3 command */
@@ -658,7 +664,9 @@ void check_chip_calibration(struct mxt224_data *data)
 		if (tch_ch+atch_ch >= 25) {
 			/* cal was bad - must recalibrate
 			   and check afterwards */
+#ifdef TOUCH_DEBUG
 			printk(KERN_ERR "[TSP] tch_ch+atch_ch  calibration was bad\n");
+#endif
 			calibrate_chip();
 			mxt_timer_state = 0;
 			mxt_time_point = jiffies_to_msecs(jiffies);
@@ -669,7 +677,9 @@ void check_chip_calibration(struct mxt224_data *data)
 
 			if (mxt_timer_state == 1) {
 				if (mxt_time_diff > 300) {
+#ifdef TOUCH_DEBUG
 					printk(KERN_INFO "[TSP] calibration was good\n");
+#endif
 					cal_check_flag = 0;
 					good_check_flag = 0;
 					mxt_timer_state = 0;
@@ -690,7 +700,9 @@ void check_chip_calibration(struct mxt224_data *data)
 						write_mem(copy_data, object_address+8, 1, &copy_data->atchfrccalthr_e);
 						write_mem(copy_data, object_address+9, 1, &copy_data->atchfrccalratio_e);
 					} else {
+#ifdef TOUCH_DEBUG
 						printk(KERN_INFO "[TSP] vbus_state = %d\n", (int)vbus_state);
+#endif
 						if (vbus_state == 0)
 							mxt224_ta_probe(vbus_state);
 					}
@@ -704,8 +716,10 @@ void check_chip_calibration(struct mxt224_data *data)
 			}
 		} else if (atch_ch >= 5) {
 			/* cal was bad - must recalibrate
-			   and check afterwards */
+			   and check */
+#ifdef TOUCH_DEBUG
 			printk(KERN_ERR "[TSP] calibration was bad\n");
+#endif
 			calibrate_chip();
 			mxt_timer_state = 0;
 			mxt_time_point = jiffies_to_msecs(jiffies);
@@ -713,7 +727,9 @@ void check_chip_calibration(struct mxt224_data *data)
 			if (atch_ch >= 1)
 				not_yet_count++;
 			if (not_yet_count > 5) {
+#ifdef TOUCH_DEBUG
 				printk(KERN_ERR "[TSP] not_yet_count calibration was bad\n");
+#endif
 				calibrate_chip();
 				mxt_timer_state = 0;
 				mxt_time_point = jiffies_to_msecs(jiffies);
@@ -721,7 +737,9 @@ void check_chip_calibration(struct mxt224_data *data)
 				/* we cannot confirm if good or bad -
 				   we must wait for next touch message
 				   to confirm */
+#ifdef TOUCH_DEBUG
 				printk(KERN_ERR "[TSP] calibration was not decided yet\n");
+#endif
 				cal_check_flag = 1u;
 				mxt_timer_state = 0;
 				mxt_time_point = jiffies_to_msecs(jiffies);
@@ -928,7 +946,7 @@ static void report_input_data(struct mxt224_data *data)
 
 	if (data->fingers[id].state == MXT224_STATE_PRESS
 		|| data->fingers[id].state == MXT224_STATE_RELEASE) {
-#if !defined(CONFIG_SAMSUNG_PRODUCT_SHIP)
+#ifdef TOUCH_DEBUG
 		printk("[TSP] id[%d],x=%d,y=%d,z=%d,w=%d\n",
 			id , data->fingers[id].x, data->fingers[id].y,
 			data->fingers[id].z, data->fingers[id].w);
@@ -1343,8 +1361,9 @@ static void mxt224_late_resume(struct early_suspend *h)
 	data->enabled = 1;
 
 	mxt224_internal_resume(data);
-
+#ifdef TOUCH_DEBUG
 	dev_info(&data->client->dev, "vbus_state = %d\n", (int)vbus_state);
+#endif
 	if (!(tsp_deepsleep && vbus_state))
 		mxt224_ta_probe(vbus_state);
 
@@ -1395,8 +1414,9 @@ static int mxt224_resume(struct device *dev)
 	data->enabled = 1;
 
 	ret = mxt224_internal_resume(data);
-
+#ifdef TOUCH_DEBUG
 	dev_info(&data->client->dev, "vbus_state = %d\n", (int)vbus_state);
+#endif
 	mxt224_ta_probe(vbus_state);
 
 	enable_irq(data->client->irq);
